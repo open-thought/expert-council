@@ -25,6 +25,10 @@ At least 2 models required. Models without a key are automatically skipped.
 ## Setup
 
 ```bash
+# uv (recommended)
+uv sync
+
+# or pip
 pip install anthropic openai google-generativeai
 ```
 
@@ -32,13 +36,13 @@ pip install anthropic openai google-generativeai
 
 ```bash
 # Direct question
-python expert_council.py "What is the best architecture for a robot world model?"
+uv run expert-council "What is the best architecture for a robot world model?"
 
 # From file
-python expert_council.py --question-file question.txt
+uv run expert-council --question-file question.txt
 
 # Custom output directory
-python expert_council.py "Your question" --output-dir ./reports/
+uv run expert-council "Your question" --output-dir ./reports/
 ```
 
 Reports are saved to `councils/YYYY-MM-DD_HHMMSS_<slug>.md`.
