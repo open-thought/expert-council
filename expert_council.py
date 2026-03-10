@@ -101,7 +101,7 @@ class GeminiBackend(LLMBackend):
         import requests
         payload = {
             "contents": [{"role": "user", "parts": [{"text": f"{system_prompt}\n\n{user_prompt}"}]}],
-            "generationConfig": {"maxOutputTokens": 1024},
+            "generationConfig": {"maxOutputTokens": 4096},
         }
         resp = requests.post(
             f"{self.endpoint}?key={self.api_key}",
