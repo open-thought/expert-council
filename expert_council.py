@@ -88,17 +88,27 @@ class GeminiBackend(LLMBackend):
     name = "Gemini"
 
     def __init__(self):
-        from google import genai
-        self.client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+        import requests
+        self.api_key = os.environ["GEMINI_API_KEY"]
+        self.model = "gemini-2.5-pro"
+        # Detect Vertex AI key (not AIza prefix) vs AI Studio key
+        if not self.api_key.startswith("AIza"):
+            self.endpoint = f"https://aiplatform.googleapis.com/v1/publishers/google/models/{self.model}:generateContent"
+        else:
+            self.endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
 
     def query(self, system_prompt: str, user_prompt: str) -> str:
-        from google.genai import types
-        resp = self.client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=f"{system_prompt}\n\n{user_prompt}",
-            config=types.GenerateContentConfig(max_output_tokens=1024),
+        import requests
+        payload = {
+            "contents": [{"role": "user", "parts": [{"text": f"{system_prompt}\n\n{user_prompt}"}]}],
+            "generationConfig": {"maxOutputTokens": 1024},
+        }
+        resp = requests.post(
+            f"{self.endpoint}?key={self.api_key}",
+            json=payload, timeout=60
         )
-        return resp.text
+        resp.raise_for_status()
+        return resp.json()["candidates"][0]["content"]["parts"][0]["text"]
 
 
 # ---------------------------------------------------------------------------
