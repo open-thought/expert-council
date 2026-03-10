@@ -53,7 +53,7 @@ class GPTBackend(LLMBackend):
         resp = self.client.chat.completions.create(
             model="gpt-5.4",
             reasoning_effort="high",
-            max_completion_tokens=4096,
+            max_completion_tokens=16384,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
