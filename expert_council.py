@@ -94,7 +94,7 @@ class GeminiBackend(LLMBackend):
     def query(self, system_prompt: str, user_prompt: str) -> str:
         from google.genai import types
         resp = self.client.models.generate_content(
-            model="gemini-2.5-pro",
+            model="gemini-2.5-flash",
             contents=f"{system_prompt}\n\n{user_prompt}",
             config=types.GenerateContentConfig(max_output_tokens=1024),
         )
