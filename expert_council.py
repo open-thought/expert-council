@@ -88,14 +88,15 @@ class GeminiBackend(LLMBackend):
     name = "Gemini"
 
     def __init__(self):
-        import google.generativeai as genai
-        genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-        self.model = genai.GenerativeModel("gemini-2.5-pro")
+        from google import genai
+        self.client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
     def query(self, system_prompt: str, user_prompt: str) -> str:
-        resp = self.model.generate_content(
-            f"{system_prompt}\n\n{user_prompt}",
-            generation_config={"max_output_tokens": 1024},
+        from google.genai import types
+        resp = self.client.models.generate_content(
+            model="gemini-2.5-pro",
+            contents=f"{system_prompt}\n\n{user_prompt}",
+            config=types.GenerateContentConfig(max_output_tokens=1024),
         )
         return resp.text
 
