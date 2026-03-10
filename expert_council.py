@@ -43,7 +43,7 @@ class ClaudeBackend(LLMBackend):
 
 
 class GPTBackend(LLMBackend):
-    name = "GPT-4o"
+    name = "GPT-5.4"
 
     def __init__(self):
         import openai
@@ -51,8 +51,9 @@ class GPTBackend(LLMBackend):
 
     def query(self, system_prompt: str, user_prompt: str) -> str:
         resp = self.client.chat.completions.create(
-            model="gpt-4o",
-            max_tokens=1024,
+            model="gpt-5.4",
+            reasoning_effort="high",
+            max_completion_tokens=4096,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
@@ -73,7 +74,7 @@ class GrokBackend(LLMBackend):
 
     def query(self, system_prompt: str, user_prompt: str) -> str:
         resp = self.client.chat.completions.create(
-            model="grok-3",
+            model="grok-4",
             max_tokens=1024,
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -383,9 +384,19 @@ def main():
     # Discord
     discord_url = os.environ.get("DISCORD_CH")
     if discord_url:
-        print("Sending to Discord...")
-        header = f"**Expert Council** — _{question[:100]}_\n\n"
-        send_discord(header + transcript["phase3_synthesis"], discord_url)
+        print("Sending TL;DR to Discord...")
+        synth = transcript["phase3_synthesis"]
+        # First 2-3 sentences as TL;DR
+        sentences = synth.replace("\n", " ").split(". ")
+        tldr = ". ".join(sentences[:3]).strip()
+        if len(tldr) > 500:
+            tldr = tldr[:500] + "..."
+        msg = (
+            f"**Expert Council** — _{question[:80]}..._\n\n"
+            f"{tldr}\n\n"
+            f"_Full report → vault: `{out_path.name}`_"
+        )
+        send_discord(msg, discord_url)
 
 
 if __name__ == "__main__":
