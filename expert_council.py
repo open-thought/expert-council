@@ -261,6 +261,27 @@ def run_council(question: str, backends: list[LLMBackend]) -> dict:
     transcript["phase3_synthesis"] = synthesis
     transcript["synthesizer"] = synthesizer.name
 
+    # ── Phase 4: Actionable Points ───────────────────────────────────────
+    print("\n▶ Phase 4 — Actionable Points")
+    # Pick the model that did NOT synthesize
+    actioneer = next((b for b in active if b.name != synthesizer.name), active[0])
+    print(f"  Actioneer: {actioneer.name}")
+
+    sys_p4 = (
+        "You are an expert consultant. You receive a synthesis from an expert council. "
+        "Extract a prioritized, concrete list of actionable items. "
+        "Format as: **Priority (High/Medium/Low)** | **Action** | **Why** | **Effort (1d/1w/1m)**. "
+        "Be specific and direct. No preamble. Max 10 items."
+    )
+    prompt_p4 = (
+        f"## Original Question\n{question}\n\n"
+        f"## Council Synthesis\n{synthesis}"
+    )
+    action_items = actioneer.query(sys_p4, prompt_p4)
+    print(f"  ✓ Action items extracted ({len(action_items.split())} words)")
+    transcript["phase4_action_items"] = action_items
+    transcript["actioneer"] = actioneer.name
+
     # Reveal mapping
     transcript["label_to_name"] = label_to_name
     return transcript
@@ -306,10 +327,10 @@ def build_markdown(t: dict) -> str:
     a(f"**Synthesizer:** {t['synthesizer']}\n")
     a(t["phase3_synthesis"] + "\n")
 
-    # Phase 4 — highlight
-    a("## Phase 4 — Final Recommendation\n")
-    a("> The synthesis above represents the council's final recommendation.")
-    a(f"> Synthesized by **{t['synthesizer']}** after reviewing all expert opinions and peer reviews.\n")
+    # Phase 4 — Actionable Points
+    a("## Phase 4 — Actionable Points\n")
+    a(f"**Extracted by:** {t.get('actioneer', '?')}\n")
+    a(t.get("phase4_action_items", "_not available_") + "\n")
 
     return "\n".join(lines)
 
@@ -402,9 +423,12 @@ def main():
         tldr = ". ".join(sentences[:3]).strip()
         if len(tldr) > 500:
             tldr = tldr[:500] + "..."
+        actions = transcript.get("phase4_action_items", "")
+        top_actions = "\n".join(actions.splitlines()[:4]) if actions else ""
         msg = (
             f"**Expert Council** — _{question[:80]}..._\n\n"
-            f"{tldr}\n\n"
+            f"**TL;DR:** {tldr}\n\n"
+            f"**Top actions:**\n{top_actions}\n\n"
             f"_Full report → vault: `{out_path.name}`_"
         )
         send_discord(msg, discord_url)
