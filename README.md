@@ -17,7 +17,7 @@ Uses the best available model per provider:
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Anthropic | `claude-opus-4-6` |
 | `OPENAI_API_KEY` | OpenAI | `gpt-5.4` (reasoning_effort=high) |
-| `XAI_API_KEY` | xAI | `grok-4` |
+| `XAI_API_KEY` | xAI | `grok-4-fast-reasoning` |
 | `GEMINI_API_KEY` | Google | `gemini-2.5-pro` _(optional)_ |
 
 At least 2 models required. Models without a key are automatically skipped.

@@ -74,7 +74,7 @@ class GrokBackend(LLMBackend):
 
     def query(self, system_prompt: str, user_prompt: str) -> str:
         resp = self.client.chat.completions.create(
-            model="grok-4",
+            model="grok-4-fast-reasoning",
             max_tokens=1024,
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -90,7 +90,7 @@ class GeminiBackend(LLMBackend):
     def __init__(self):
         import google.generativeai as genai
         genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-        self.model = genai.GenerativeModel("gemini-2.0-flash")
+        self.model = genai.GenerativeModel("gemini-2.5-pro")
 
     def query(self, system_prompt: str, user_prompt: str) -> str:
         resp = self.model.generate_content(
